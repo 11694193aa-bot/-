@@ -1,0 +1,319 @@
+
+<!DOCTYPE html>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0d0a1a;color:#e8e0f0;font-family:'Georgia',serif;min-height:100vh;overflow-x:hidden}
+.app{max-width:680px;margin:0 auto;padding:2rem 1rem 3rem}
+h1{font-size:2rem;font-weight:400;letter-spacing:.12em;text-align:center;color:#d4af7a;text-shadow:0 0 40px rgba(212,175,122,.3);margin-bottom:.4rem}
+.subtitle{text-align:center;font-size:.85rem;letter-spacing:.2em;color:#8a7fa0;font-family:sans-serif;margin-bottom:2.5rem}
+.question-wrap{margin-bottom:2rem}
+.question-wrap label{display:block;font-size:.78rem;letter-spacing:.15em;color:#8a7fa0;font-family:sans-serif;margin-bottom:.5rem}
+.question-wrap input{width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(212,175,122,.2);border-radius:10px;padding:.7rem 1rem;color:#e8e0f0;font-family:'Georgia',serif;font-size:.95rem;outline:none;transition:border .2s}
+.question-wrap input:focus{border-color:rgba(212,175,122,.5)}
+.question-wrap input::placeholder{color:#4a4060}
+.spread-select{display:flex;gap:.5rem;margin-bottom:2rem;justify-content:center;flex-wrap:wrap}
+.spread-btn{background:rgba(255,255,255,.04);border:1px solid rgba(212,175,122,.15);border-radius:20px;color:#8a7fa0;font-size:.78rem;letter-spacing:.12em;padding:.45rem 1.1rem;cursor:pointer;transition:all .2s;font-family:sans-serif}
+.spread-btn.active{background:rgba(212,175,122,.12);border-color:rgba(212,175,122,.5);color:#d4af7a}
+.draw-btn{display:block;margin:0 auto 2.5rem;background:linear-gradient(135deg,rgba(212,175,122,.15),rgba(180,130,180,.1));border:1px solid rgba(212,175,122,.4);border-radius:50px;color:#d4af7a;font-family:'Georgia',serif;font-size:1rem;letter-spacing:.15em;padding:.8rem 2.5rem;cursor:pointer;transition:all .3s;box-shadow:0 0 20px rgba(212,175,122,.08)}
+.draw-btn:hover{background:linear-gradient(135deg,rgba(212,175,122,.22),rgba(180,130,180,.15));box-shadow:0 0 35px rgba(212,175,122,.2);transform:translateY(-1px)}
+.draw-btn:active{transform:translateY(0)}
+.cards-area{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin-bottom:2.5rem;min-height:200px;align-items:flex-start}
+.card-slot{display:flex;flex-direction:column;align-items:center;gap:.6rem;flex:1;min-width:120px;max-width:160px}
+.card-label{font-size:.72rem;letter-spacing:.15em;color:#6a5f80;font-family:sans-serif;text-align:center}
+.card-wrap{width:100%;aspect-ratio:2/3;perspective:800px;cursor:pointer}
+.card-inner{width:100%;height:100%;position:relative;transform-style:preserve-3d;transition:transform .7s cubic-bezier(.4,0,.2,1)}
+.card-wrap.flipped .card-inner{transform:rotateY(180deg)}
+.card-face,.card-back{position:absolute;inset:0;border-radius:10px;backface-visibility:hidden;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:.5rem;padding:.5rem}
+.card-back{background:linear-gradient(135deg,#1a0f2e,#2a1545);border:1px solid rgba(212,175,122,.25);overflow:hidden}
+.card-back-pattern{width:100%;height:100%;position:absolute;opacity:.18;background-image:repeating-linear-gradient(45deg,#d4af7a 0,#d4af7a 1px,transparent 0,transparent 50%);background-size:10px 10px}
+.card-back-symbol{font-size:2.2rem;position:relative;z-index:1;opacity:.6}
+.card-face{background:linear-gradient(160deg,#1e1035,#2a1a40);border:1px solid rgba(212,175,122,.35);transform:rotateY(180deg)}
+.card-face.reversed .card-symbol{transform:rotate(180deg)}
+.card-symbol{font-size:2.8rem;line-height:1}
+.card-name{font-size:.7rem;letter-spacing:.1em;color:#d4af7a;text-align:center;line-height:1.3}
+.card-rev{font-size:.62rem;color:#8a5f80;font-family:sans-serif;letter-spacing:.1em}
+.loading-dots{display:inline-flex;gap:4px;align-items:center}
+.loading-dots span{width:4px;height:4px;border-radius:50%;background:#d4af7a;animation:dot .9s infinite}
+.loading-dots span:nth-child(2){animation-delay:.15s}
+.loading-dots span:nth-child(3){animation-delay:.3s}
+@keyframes dot{0%,80%,100%{opacity:.2;transform:scale(.8)}40%{opacity:1;transform:scale(1)}}
+.reading-section{background:rgba(255,255,255,.03);border:1px solid rgba(212,175,122,.12);border-radius:14px;padding:1.5rem;animation:fadeUp .6s ease both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.reading-title{font-size:.72rem;letter-spacing:.2em;color:#6a5f80;font-family:sans-serif;margin-bottom:1.2rem;text-align:center}
+.reading-cards{display:flex;flex-direction:column;gap:1.2rem}
+.reading-card{border-left:2px solid rgba(212,175,122,.3);padding-left:1rem}
+.reading-card-header{display:flex;align-items:baseline;gap:.6rem;margin-bottom:.4rem}
+.reading-card-pos{font-size:.72rem;letter-spacing:.12em;color:#6a5f80;font-family:sans-serif}
+.reading-card-name{font-size:.95rem;color:#d4af7a;font-weight:400}
+.reading-card-rev{font-size:.7rem;color:#8a5f80;font-family:sans-serif}
+.reading-card-text{font-size:.88rem;line-height:1.75;color:#b0a8c8;font-family:sans-serif}
+.reading-summary{margin-top:1.4rem;padding-top:1.2rem;border-top:1px solid rgba(212,175,122,.1)}
+.reading-summary-label{font-size:.72rem;letter-spacing:.2em;color:#6a5f80;font-family:sans-serif;margin-bottom:.5rem}
+.reading-summary-text{font-size:.9rem;line-height:1.75;color:#c8c0e0;font-family:sans-serif}
+.orb{position:fixed;pointer-events:none;border-radius:50%;filter:blur(80px);opacity:.07;z-index:0}
+.reset-btn{display:block;margin:1.5rem auto 0;background:none;border:1px solid rgba(212,175,122,.2);border-radius:20px;color:#6a5f80;font-family:sans-serif;font-size:.75rem;letter-spacing:.12em;padding:.4rem 1.2rem;cursor:pointer;transition:all .2s}
+.reset-btn:hover{border-color:rgba(212,175,122,.4);color:#a09080}
+</style>
+
+<div style="position:fixed;top:-20%;left:-10%;width:400px;height:400px;background:#3a1f6a;border-radius:50%;filter:blur(100px);opacity:.12;pointer-events:none;z-index:0"></div>
+<div style="position:fixed;bottom:-20%;right:-10%;width:350px;height:350px;background:#1a3f5a;border-radius:50%;filter:blur(100px);opacity:.1;pointer-events:none;z-index:0"></div>
+
+<div class="app" style="position:relative;z-index:1">
+  <h1>✦ 星辰塔罗 ✦</h1>
+  <p class="subtitle">MYSTIC TAROT · 命运的低语</p>
+
+  <div id="setup-area">
+    <div class="question-wrap">
+      <label>YOUR QUESTION · 你的问题（可选）</label>
+      <input type="text" id="question-input" placeholder="在心中默念，或写下你想探寻的..." maxlength="100">
+    </div>
+    <div class="spread-select">
+      <button class="spread-btn active" data-spread="3">三牌阵 · 过去/现在/未来</button>
+      <button class="spread-btn" data-spread="1">单牌占卜</button>
+      <button class="spread-btn" data-spread="5">五牌阵 · 完整局势</button>
+    </div>
+    <button class="draw-btn" id="draw-btn">✦ 洗牌并抽牌 ✦</button>
+  </div>
+
+  <div class="cards-area" id="cards-area"></div>
+  <div id="reading-area"></div>
+</div>
+
+<script>
+const CARDS = [
+  {name:'愚者',sym:'🌟',el:'风',num:'0'},
+  {name:'魔术师',sym:'🔮',el:'水星',num:'I'},
+  {name:'女祭司',sym:'🌙',el:'月亮',num:'II'},
+  {name:'女皇',sym:'🌹',el:'金星',num:'III'},
+  {name:'皇帝',sym:'🦅',el:'白羊',num:'IV'},
+  {name:'教皇',sym:'⛪',el:'金牛',num:'V'},
+  {name:'恋人',sym:'💫',el:'双子',num:'VI'},
+  {name:'战车',sym:'🏆',el:'巨蟹',num:'VII'},
+  {name:'力量',sym:'🦁',el:'狮子',num:'VIII'},
+  {name:'隐者',sym:'🕯️',el:'处女',num:'IX'},
+  {name:'命运之轮',sym:'☸️',el:'木星',num:'X'},
+  {name:'正义',sym:'⚖️',el:'天秤',num:'XI'},
+  {name:'倒吊人',sym:'🔄',el:'海王',num:'XII'},
+  {name:'死神',sym:'🦋',el:'天蝎',num:'XIII'},
+  {name:'节制',sym:'🌊',el:'射手',num:'XIV'},
+  {name:'恶魔',sym:'🔗',el:'摩羯',num:'XV'},
+  {name:'塔',sym:'⚡',el:'火星',num:'XVI'},
+  {name:'星星',sym:'⭐',el:'水瓶',num:'XVII'},
+  {name:'月亮',sym:'🌑',el:'双鱼',num:'XVIII'},
+  {name:'太阳',sym:'☀️',el:'太阳',num:'XIX'},
+  {name:'审判',sym:'🎺',el:'冥王',num:'XX'},
+  {name:'世界',sym:'🌍',el:'土星',num:'XXI'},
+  {name:'权杖王牌',sym:'🌿',el:'火',num:'Ace'},
+  {name:'圣杯王牌',sym:'💎',el:'水',num:'Ace'},
+  {name:'宝剑王牌',sym:'🗡️',el:'风',num:'Ace'},
+  {name:'星币王牌',sym:'💰',el:'土',num:'Ace'},
+  {name:'权杖三',sym:'🌄',el:'火',num:'III'},
+  {name:'圣杯七',sym:'🍷',el:'水',num:'VII'},
+  {name:'宝剑六',sym:'⛵',el:'风',num:'VI'},
+  {name:'星币十',sym:'🏠',el:'土',num:'X'},
+];
+
+const UPRIGHT = {
+  '愚者':'新的开始正在向你招手，以开放的心态拥抱未知旅程，无畏地踏出第一步，命运将引领你走向意想不到的精彩。',
+  '魔术师':'你拥有实现目标所需的一切资源与才能，此刻是将想法付诸行动的最佳时机，专注意志，创造奇迹。',
+  '女祭司':'深层直觉正在向你低语，保持内心的宁静，倾听内在声音，答案已潜藏在你的潜意识之中。',
+  '女皇':'丰盛与创造力环绕着你，与自然和生命力联结，滋养你所珍视的事物，繁荣将随之而来。',
+  '皇帝':'稳定的基础与领导力是当下主题，建立秩序与规则，以理性与权威引导前进方向。',
+  '教皇':'传统智慧与精神指引支持着你，寻求经验丰富者的建议，遵循内心深处的道德准则。',
+  '恋人':'面临重要的选择与联结，真实的价值观将指引你做出与灵魂共鸣的决定，心灵的和谐即将到来。',
+  '战车':'以坚定的意志与自律克服一切障碍，胜利属于那些能够掌控内外力量、勇往直前的人。',
+  '力量':'内在的勇气与温柔的力量比强硬更有效，以耐心和同理心驾驭挑战，你比自己想象的更强大。',
+  '隐者':'需要一段独处与沉思的时光，向内探索，寻找内在的光芒，智慧来自于宁静的反思。',
+  '命运之轮':'重大的转变正在发生，命运的齿轮开始转动，保持适应性，抓住新周期带来的机遇。',
+  '正义':'诚实与公平是此刻的核心，承担行为的责任，明智的决定将带来平衡与公正的结果。',
+  '倒吊人':'暂停与等待带来全新视角，放下控制，接受现状，从不同角度看问题将带来启示。',
+  '死神':'重大的转化与结束，旧有的事物完成使命，为新生腾出空间，改变虽痛苦却是必要的成长。',
+  '节制':'寻求平衡与耐心，调和生活中的对立面，温和而坚定地向着目标迈进，和谐将随时间而来。',
+  '恶魔':'审视那些束缚你的恐惧与执念，物质主义或有害关系正在消耗你的能量，认清锁链才能打破它。',
+  '塔':'意外的颠覆与突破，虽然震撼，却能摧毁不稳固的根基，为真实的重建创造空间。',
+  '星星':'希望、启示与精神更新正在降临，最黑暗的时刻已经过去，信任宇宙的引导，光明在前方等待。',
+  '月亮':'潜意识的恐惧与幻觉需要被审视，保持警惕，事情可能并不如表面所见，倾听直觉的警示。',
+  '太阳':'喜悦、成功与充沛的活力照耀你的道路，一切都在朝着最好的方向发展，庆祝生命的光辉吧。',
+  '审判':'重要的觉醒与自我评估时刻，回顾过去的选择，以全新的意识迎接转变，崭新的篇章正在开启。',
+  '世界':'圆满完成与整合，一个重要的周期达到高峰，庆祝所有的成就，带着智慧迈向下一段旅程。',
+  '权杖王牌':'充满激情的新开始，火热的创意与行动力，把握这股能量点燃新项目或冒险的火苗。',
+  '圣杯王牌':'情感的全新开始，直觉与创意的泉涌，向爱、联结与情感上的丰盛敞开心扉。',
+  '宝剑王牌':'清晰的思维与决断力，以真理切除混乱，直面挑战，真相将带来突破与新的清明。',
+  '星币王牌':'物质繁荣的新机遇，务实的行动与踏实的努力将带来稳固的成果，把握具体的机会。',
+  '权杖三':'努力开始显现成果，展望宏观愿景，远大的计划正在成型，等待中的收获即将到来。',
+  '圣杯七':'面临众多幻想与选择，区分真实欲望与短暂幻觉，聚焦于真正重要的事物。',
+  '宝剑六':'从困境中平稳过渡，经历风浪后驶向平静的水域，放下过去，迎接更平和的阶段。',
+  '星币十':'长期的繁荣与家庭稳定，物质上的丰盛与传承，珍惜已有的一切，家庭与社群带来深层满足。',
+};
+const REVERSED = {
+  '愚者':'鲁莽或过度犹豫阻碍了你的前进，审视内心的恐惧，找到冒险与谨慎之间的平衡点。',
+  '魔术师':'才能被浪费或意图不纯正，审视是否在欺骗自己或他人，整合内在力量才能真正发挥潜能。',
+  '女祭司':'忽视了内心的声音，过于依赖外在信息，回归内心，倾听被压制的直觉与智慧。',
+  '女皇':'创造力受阻或自我忽视，过度依赖他人认可，重新滋养自己，找回内在的丰盛与价值感。',
+  '皇帝':'过度控制或权威失衡，灵活地放下执念，在坚持原则的同时给予他人空间与自由。',
+  '教皇':'质疑传统的束缚，打破不适合的规则，在灵性探索上走出自己的道路，不必遵循常规。',
+  '恋人':'价值观不合或逃避选择，面对内心真正的渴望，做出符合内在真实的决定而非妥协。',
+  '战车':'失去方向或过于强硬，侵略性的驱动力正在耗尽能量，学习在行动中融入柔软与适应。',
+  '力量':'怀疑自己的力量或过度压抑情绪，温和地面对内心的恐惧，勇气源于接纳而非压制。',
+  '隐者':'过度孤立或拒绝内省，与他人的联结同样重要，走出内心的小屋，允许他人进入你的世界。',
+  '命运之轮':'抗拒变化或被动等待，命运需要你的主动参与，认清循环的模式并做出有意识的选择。',
+  '正义':'不公或逃避责任，审视自己是否在自欺欺人，诚实面对行为的后果才能真正解脱。',
+  '倒吊人':'拖延与牺牲毫无意义，检视是否陷入受害者心态，是时候采取行动打破僵局。',
+  '死神':'抗拒必要的改变，执着于已经消逝的事物，放手才能获得真正的自由与新生。',
+  '节制':'失衡与过度，某个领域的极端正在带来问题，寻找节制与中庸之道是当务之急。',
+  '恶魔':'开始意识到束缚的存在，解脱之路正在打开，勇敢面对阴影，内在自由触手可及。',
+  '塔':'担忧灾难或抗拒内在的改变，无法避免的转变终将到来，不如主动面对而非被动承受。',
+  '星星':'失去希望或对未来感到迷茫，重新与内在的光联结，宇宙的支持从未消失，只是需要重新感知。',
+  '月亮':'混乱与幻觉的迷雾开始消散，潜藏的恐惧浮现需要被整合，清明正在逐渐恢复。',
+  '太阳':'短暂的阴云遮蔽了阳光，过度乐观或自我放大带来盲点，保持真实与谦逊，光明终将重现。',
+  '审判':'自我批判过重或拒绝成长，放下对过去的执念，以宽容的心接受自己的旅程与选择。',
+  '世界':'感到停滞或未竟事宜需要完成，找出阻碍圆满的根源，整合尚未解决的部分，完成才能前进。',
+  '权杖王牌':'创意受阻或能量分散，重新点燃热情之火，小心不要在起步阶段就放弃了热情。',
+  '圣杯王牌':'情感受阻或自我封闭，允许情感自然流动，不要压抑内心真实的感受与需要。',
+  '宝剑王牌':'思维混乱或言语伤人，在说话前三思，以真理服人而非以言语伤害，清明需要时间。',
+  '星币王牌':'物质机会被错失或过于保守，审视对金钱与安全感的执念，稳健地把握眼前的机会。',
+  '权杖三':'拖延或无法实现愿景，检视是否在计划上过度停留，行动的时候到了。',
+  '圣杯七':'幻觉破灭或面对现实，清除不切实际的期待，把握真实可行的选择。',
+  '宝剑六':'逃避困境或旅程受阻，面对需要处理的问题，真正的平静来自解决而非逃避。',
+  '星币十':'家庭矛盾或物质上的不安全感，审视对繁荣的定义，真正的丰盛源于内在的满足。',
+};
+
+const SPREADS = {
+  1:[{label:'当下启示',pos:'center'}],
+  3:[{label:'过去',pos:'left'},{label:'现在',pos:'center'},{label:'未来',pos:'right'}],
+  5:[{label:'根源',pos:'left'},{label:'阻碍',pos:'center-left'},{label:'现状',pos:'center'},{label:'建议',pos:'center-right'},{label:'结果',pos:'right'}]
+};
+
+let currentSpread=3, drawnCards=[], isDrawn=false;
+
+document.querySelectorAll('.spread-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.spread-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    currentSpread=parseInt(btn.dataset.spread);
+    if(isDrawn) reset();
+  });
+});
+
+function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+
+function getReading(card, position, question){
+  const q = question.trim();
+  const isRev = card.reversed;
+  const base = isRev ? (REVERSED[card.name]||UPRIGHT[card.name]) : (UPRIGHT[card.name]||'');
+  let posText = '';
+  if(position==='过去') posText='在过去的能量影响下，';
+  else if(position==='现在') posText='此刻的处境显示，';
+  else if(position==='未来') posText='未来的走向指引，';
+  else if(position==='阻碍') posText='需要克服的挑战是，';
+  else if(position==='建议') posText='塔罗的建议是，';
+  else if(position==='结果') posText='最终的走向显示，';
+  else if(position==='根源') posText='事情的根源在于，';
+  return posText + base;
+}
+
+function buildSummary(cards, question){
+  const names = cards.map(c=>c.name).join('、');
+  const q = question.trim();
+  let s = `本次抽到了${names}，`;
+  if(q) s += `针对你所问的"${q}"，`;
+  const hasPositive = cards.some(c=>!c.reversed);
+  const hasNegative = cards.some(c=>c.reversed);
+  if(hasPositive && !hasNegative) s += '整体能量呈正向流动，宇宙正在支持你前进的方向，保持信心，以开放之心迎接即将到来的改变。';
+  else if(!hasPositive && hasNegative) s += '能量显示当下存在一些内在阻碍需要审视，这是一个向内探索、整合阴影的重要时机，转化即将开始。';
+  else s += '正逆位并存，显示当下处于转化的过渡期，既有已建立的基础，也有需要调整的面向，平衡与觉察是关键。';
+  return s;
+}
+
+document.getElementById('draw-btn').addEventListener('click',()=>{
+  if(isDrawn) return;
+  const question = document.getElementById('question-input').value;
+  const spread = SPREADS[currentSpread];
+  const shuffled = shuffle(CARDS);
+  drawnCards = spread.map((s,i)=>({
+    ...shuffled[i],
+    reversed: Math.random()<0.35,
+    position: s.label
+  }));
+  
+  const area = document.getElementById('cards-area');
+  area.innerHTML='';
+  drawnCards.forEach((card,i)=>{
+    const slot = document.createElement('div');
+    slot.className='card-slot';
+    const label = document.createElement('div');
+    label.className='card-label';
+    label.textContent=spread[i].label.toUpperCase();
+    const wrap = document.createElement('div');
+    wrap.className='card-wrap';
+    wrap.innerHTML=`<div class="card-inner">
+      <div class="card-back"><div class="card-back-pattern"></div><div class="card-back-symbol">✦</div></div>
+      <div class="card-face${card.reversed?' reversed':''}">
+        <div class="card-symbol">${card.sym}</div>
+        <div class="card-name">${card.num} · ${card.name}</div>
+        <div class="card-rev">${card.reversed?'逆位':'正位'}</div>
+      </div>
+    </div>`;
+    slot.appendChild(label);
+    slot.appendChild(wrap);
+    area.appendChild(slot);
+    
+    setTimeout(()=>{
+      wrap.classList.add('flipped');
+      if(i===drawnCards.length-1){
+        setTimeout(()=>showReading(question),500);
+      }
+    },400+i*600);
+  });
+  
+  isDrawn=true;
+  document.getElementById('draw-btn').style.opacity='0.3';
+  document.getElementById('draw-btn').style.cursor='default';
+});
+
+function showReading(question){
+  const area = document.getElementById('reading-area');
+  area.innerHTML='';
+  const sec = document.createElement('div');
+  sec.className='reading-section';
+  
+  let html=`<div class="reading-title">✦ &nbsp; 牌义解读 &nbsp; ✦</div><div class="reading-cards">`;
+  drawnCards.forEach(card=>{
+    const text = getReading(card, card.position, question);
+    html+=`<div class="reading-card">
+      <div class="reading-card-header">
+        <span class="reading-card-pos">${card.position}</span>
+        <span class="reading-card-name">${card.name}</span>
+        <span class="reading-card-rev">${card.reversed?'逆位':'正位'}</span>
+      </div>
+      <div class="reading-card-text">${text}</div>
+    </div>`;
+  });
+  html+=`</div>`;
+  
+  const summary = buildSummary(drawnCards, question);
+  html+=`<div class="reading-summary">
+    <div class="reading-summary-label">✦ &nbsp; 综合解读 &nbsp; ✦</div>
+    <div class="reading-summary-text">${summary}</div>
+  </div>`;
+  
+  sec.innerHTML=html;
+  
+  const resetBtn = document.createElement('button');
+  resetBtn.className='reset-btn';
+  resetBtn.textContent='✦ 重新占卜';
+  resetBtn.addEventListener('click', reset);
+  
+  area.appendChild(sec);
+  area.appendChild(resetBtn);
+}
+
+function reset(){
+  isDrawn=false;
+  document.getElementById('cards-area').innerHTML='';
+  document.getElementById('reading-area').innerHTML='';
+  document.getElementById('draw-btn').style.opacity='1';
+  document.getElementById('draw-btn').style.cursor='pointer';
+  document.getElementById('question-input').value='';
+}
+</script>
