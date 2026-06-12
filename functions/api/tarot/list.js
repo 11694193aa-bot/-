@@ -21,6 +21,7 @@ export async function onRequest(context) {
             id: sortedKeys[index],
             question: data.question || '',
             createdAt: data.createdAt,
+            aiSummary: data.aiSummary || '',
             cards: Array.isArray(data.cards)
               ? data.cards.map(card => ({
                   name: card.name,

@@ -1,3 +1,4 @@
+=== index.html ===
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -11,7 +12,7 @@
   <style>
     *{box-sizing:border-box;margin:0;padding:0}
     body{background:#0d0a1a;color:#e8e0f0;font-family:'Georgia',serif;min-height:100vh;overflow-x:hidden}
-    .app{max-width:680px;margin:0 auto;padding:2rem 1rem calc(3rem + env(safe-area-inset-bottom));position:relative;z-index:1}
+    .app{max-width:680px;margin:0 auto;padding:2rem 1rem 3rem;position:relative;z-index:1}
     h1{font-size:2rem;font-weight:400;letter-spacing:.12em;text-align:center;color:#d4af7a;text-shadow:0 0 40px rgba(212,175,122,.3);margin-bottom:.4rem}
     .subtitle{text-align:center;font-size:.85rem;letter-spacing:.2em;color:#8a7fa0;font-family:sans-serif;margin-bottom:2.5rem}
     .question-wrap{margin-bottom:2rem}
@@ -19,10 +20,6 @@
     .question-wrap input{width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(212,175,122,.2);border-radius:10px;padding:.7rem 1rem;color:#e8e0f0;font-family:'Georgia',serif;font-size:.95rem;outline:none;transition:border .2s}
     .question-wrap input:focus{border-color:rgba(212,175,122,.5)}
     .question-wrap input::placeholder{color:#4a4060}
-    .api-key-wrap{margin-bottom:1.2rem}
-    .api-key-row{display:flex;gap:.6rem;flex-wrap:wrap;align-items:center}
-    .api-key-row input{flex:1;min-width:180px;font-size:.95rem}
-    .api-key-status{margin-top:.6rem;font-size:.82rem;color:#8a7fa0;font-family:sans-serif}
     .spread-select{display:flex;gap:.5rem;margin-bottom:2rem;justify-content:center;flex-wrap:wrap}
     .spread-btn{background:rgba(255,255,255,.04);border:1px solid rgba(212,175,122,.15);border-radius:20px;color:#8a7fa0;font-size:.78rem;letter-spacing:.12em;padding:.45rem 1.1rem;cursor:pointer;transition:all .2s;font-family:sans-serif}
     .spread-btn.active{background:rgba(212,175,122,.12);border-color:rgba(212,175,122,.5);color:#d4af7a}
@@ -71,31 +68,6 @@
     .history-item{border:1px solid rgba(212,175,122,.12);border-radius:12px;padding:1rem;background:rgba(255,255,255,.02)}
     .history-item p{font-size:.84rem;line-height:1.6;color:#c8c0e0}
     .history-item strong{color:#d4af7a}
-
-    @media (max-width: 480px) {
-      h1 { font-size: 1.5rem; }
-      .subtitle { font-size: .75rem; margin-bottom: 1.8rem; }
-      .cards-area { gap: .6rem; }
-      .card-slot { min-width: 90px; max-width: 110px; }
-      .spread-select { gap: .4rem; }
-      .spread-btn { font-size: .72rem; padding: .4rem .8rem; }
-      .action-group { flex-direction: column; align-items: stretch; padding: 0 .5rem; }
-      .action-btn { text-align: center; padding: .9rem 1rem; font-size: .85rem; }
-      .draw-btn { width: 90%; font-size: .95rem; }
-      .reading-card-text, .reading-summary-text { font-size: .92rem; line-height: 1.85; }
-      .api-key-row input { font-size: .85rem; }
-      .cards-area.spread-5 { display: grid; grid-template-columns: repeat(3, 1fr); }
-      .cards-area.spread-5 .card-slot:nth-child(1) { grid-column: 1; }
-      .cards-area.spread-5 .card-slot:nth-child(2) { grid-column: 2; }
-      .cards-area.spread-5 .card-slot:nth-child(3),
-      .cards-area.spread-5 .card-slot:nth-child(4),
-      .cards-area.spread-5 .card-slot:nth-child(5) { grid-column: auto; }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .card-inner { transition: transform .3s ease; }
-      .reading-section { animation: none; }
-    }
   </style>
 </head>
 <body>
@@ -111,18 +83,9 @@
         <label>YOUR QUESTION · 你的问题（可选）</label>
         <input type="text" id="question-input" placeholder="在心中默念，或写下你想探寻的..." maxlength="100">
       </div>
-      <div class="api-key-wrap">
-        <label>DEEPSEEK API KEY · 填入后启用 AI 解读（本地保存，不上传）</label>
-        <div class="api-key-row">
-          <input type="text" id="api-key-input" placeholder="DeepSeek API Key" maxlength="200" autocomplete="off">
-          <button class="action-btn" id="api-key-save" type="button">保存 Key</button>
-        </div>
-        <div class="reading-info api-key-status" id="api-key-status">✦ 未检测到 API Key，将使用本地解读</div>
-      </div>
       <div class="spread-select">
         <button class="spread-btn active" data-spread="3">三牌阵 · 过去/现在/未来</button>
         <button class="spread-btn" data-spread="1">单牌占卜</button>
-        <button class="spread-btn" data-spread="7">三张卡 · 无牌阵</button>
         <button class="spread-btn" data-spread="5">五牌阵 · 完整局势</button>
       </div>
       <button class="draw-btn" id="draw-btn">✦ 洗牌并抽牌 ✦</button>
@@ -236,32 +199,8 @@
     const SPREADS = {
       1:[{label:'当下启示',pos:'center'}],
       3:[{label:'过去',pos:'left'},{label:'现在',pos:'center'},{label:'未来',pos:'right'}],
-      7:[{label:'第一张',pos:'左'}, {label:'第二张',pos:'中'}, {label:'第三张',pos:'右'}],
       5:[{label:'根源',pos:'left'},{label:'阻碍',pos:'center-left'},{label:'现状',pos:'center'},{label:'建议',pos:'center-right'},{label:'结果',pos:'right'}]
     };
-
-    const KEY_STORAGE = 'tarot_ds_key';
-    const apiKeyInput = document.getElementById('api-key-input');
-    const apiKeyStatus = document.getElementById('api-key-status');
-    const savedKey = localStorage.getItem(KEY_STORAGE) || '';
-    if (savedKey) {
-      apiKeyInput.value = savedKey;
-      apiKeyStatus.textContent = '✦ 已载入保存的 Key，AI 解读已启用';
-      apiKeyStatus.style.color = '#7a9f7a';
-    }
-
-    document.getElementById('api-key-save').addEventListener('click', () => {
-      const k = apiKeyInput.value.trim();
-      if (k) {
-        localStorage.setItem(KEY_STORAGE, k);
-        apiKeyStatus.textContent = '✦ Key 已保存到本地，AI 解读已启用';
-        apiKeyStatus.style.color = '#7a9f7a';
-      } else {
-        localStorage.removeItem(KEY_STORAGE);
-        apiKeyStatus.textContent = '✦ Key 已清除，将使用本地解读';
-        apiKeyStatus.style.color = '#8a7fa0';
-      }
-    });
 
     let currentSpread=3, drawnCards=[], isDrawn=false;
 
@@ -275,21 +214,17 @@
     });
 
     document.getElementById('draw-btn').addEventListener('click',()=>{
-      if(isDrawn) {
-        alert('已抽牌，请先重新占卜');
-        return;
-      }
+      if(isDrawn) return;
       const question = document.getElementById('question-input').value;
       const spread = SPREADS[currentSpread];
       const shuffled = shuffle(CARDS);
-      drawnCards = spread.map((s,i)=>({
-        ...shuffled[i],
+      drawnCards = spread.map((s,i)=>(
+        {...shuffled[i],
         reversed: Math.random()<0.35,
         position: s.label
       }));
 
       const area = document.getElementById('cards-area');
-      area.className = 'cards-area' + (currentSpread === 5 ? ' spread-5' : '');
       area.innerHTML='';
       drawnCards.forEach((card,i)=>{
         const slot = document.createElement('div');
@@ -325,8 +260,6 @@
       drawBtn.style.cursor='default';
     });
 
-    document.getElementById('history-btn').addEventListener('click', showHistory);
-
     function shuffle(arr){
       const a=[...arr];
       for(let i=a.length-1;i>0;i--){
@@ -347,9 +280,6 @@
       else if(position==='建议') posText='塔罗的建议是，';
       else if(position==='结果') posText='最终的走向显示，';
       else if(position==='根源') posText='事情的根源在于，';
-      else if(position==='第一张') posText='第一张卡展示的核心能量是，';
-      else if(position==='第二张') posText='第二张卡表达的当前状态是，';
-      else if(position==='第三张') posText='第三张卡透露的未来趋势是，';
       return posText + base;
     }
 
@@ -411,14 +341,12 @@
     async function saveRecord(question, summary, button){
       if(button.disabled) return;
       button.disabled = true;
-      button.textContent = '✦ AI解牌中...';
-      const apiKey = apiKeyInput.value.trim() || localStorage.getItem(KEY_STORAGE) || '';
+      button.textContent = '保存中...';
       const payload = {
         question: question.trim(),
         cards: drawnCards.map(({name,reversed,position})=>({name,reversed,position})),
         summary,
-        createdAt: Date.now(),
-        apiKey
+        createdAt: Date.now()
       };
       try {
         const res = await fetch('/api/tarot/save', {
@@ -428,23 +356,21 @@
         });
         if(!res.ok) throw new Error('保存失败');
         const data = await res.json();
-        if(data.aiSummary) {
+        button.textContent = '已保存';
+        if(data.aiSummary && data.aiSummary !== summary){
           const textEl = document.querySelector('.reading-summary-text');
           if(textEl){
             textEl.textContent = data.aiSummary;
+            const note = document.createElement('div');
+            note.className = 'reading-info';
+            note.textContent = '（AI 个性化解读已载入）';
             if(!document.querySelector('.reading-info')){
-              const note = document.createElement('div');
-              note.className = 'reading-info';
-              note.textContent = '✦ DeepSeek AI 个性化解读';
               textEl.parentNode.appendChild(note);
             }
           }
-          button.textContent = '✦ AI解牌完成';
-        } else {
-          button.textContent = '✦ 已保存（使用本地解读）';
         }
       } catch (error) {
-        button.textContent = '保存失败，点击重试';
+        button.textContent = '保存失败';
         button.disabled = false;
         console.error(error);
         alert('保存占卜记录时出现问题，请稍后再试。');
@@ -496,3 +422,180 @@
   </script>
 </body>
 </html>
+
+=== manifest.json ===
+{
+  "name": "星辰塔罗",
+  "short_name": "塔罗",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0d0a1a",
+  "theme_color": "#0d0a1a",
+  "icons": [
+    {"src": "/icon-192.png", "sizes": "192x192", "type": "image/png"},
+    {"src": "/icon-512.png", "sizes": "512x512", "type": "image/png"}
+  ]
+}
+
+=== sw.js ===
+const CACHE = 'tarot-v1';
+const ASSETS = ['/', '/index.html'];
+
+self.addEventListener('install', e => {
+  e.waitUntil(
+    caches.open(CACHE).then(c => c.addAll(ASSETS))
+  );
+});
+
+self.addEventListener('fetch', e => {
+  e.respondWith(
+    caches.match(e.request).then(r => r || fetch(e.request))
+  );
+});
+
+=== functions/api/tarot/save.js ===
+export async function onRequest(context) {
+  const { request, env } = context;
+  if (request.method !== 'POST') {
+    return new Response('Method Not Allowed', { status: 405 });
+  }
+
+  let body;
+  try {
+    body = await request.json();
+  } catch (error) {
+    return new Response('Invalid JSON payload', { status: 400 });
+  }
+
+  const { question = '', cards, summary = '', createdAt } = body;
+  if (!Array.isArray(cards) || typeof createdAt !== 'number') {
+    return new Response('Invalid payload', { status: 400 });
+  }
+
+  const record = {
+    question: String(question).trim(),
+    cards: cards.map(c => ({
+      name: String(c.name || ''),
+      reversed: Boolean(c.reversed),
+      position: String(c.position || '')
+    })),
+    summary: String(summary),
+    createdAt,
+    aiSummary: null
+  };
+
+  try {
+    const stored = await augmentAI(record, env);
+    const key = String(Date.now());
+    await env.TAROT.put(key, JSON.stringify(stored));
+    await pruneOldRecords(env);
+    return new Response(JSON.stringify(stored), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  } catch (error) {
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+}
+
+async function augmentAI(record, env) {
+  const apiKey = env.OPENAI_API_KEY;
+  if (!apiKey) {
+    record.aiSummary = record.summary;
+    return record;
+  }
+
+  const prompt = `请基于以下塔罗牌占卜结果，为提问者生成一段简洁且温暖的个性化解读。\n提问：${record.question || '无具体问题'}\n牌阵：${record.cards.map(c => `${c.position} ${c.name}${c.reversed ? '（逆位）' : ''}`).join('，')}\n综合分析：${record.summary}`;
+
+  try {
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model: 'gpt-3.5-turbo',
+        messages: [{ role: 'user', content: prompt }],
+        max_tokens: 180,
+        temperature: 0.8
+      })
+    });
+
+    if (!response.ok) {
+      record.aiSummary = record.summary;
+      return record;
+    }
+
+    const data = await response.json();
+    const aiText = data?.choices?.[0]?.message?.content?.trim();
+    record.aiSummary = aiText || record.summary;
+  } catch (error) {
+    record.aiSummary = record.summary;
+  }
+
+  return record;
+}
+
+async function pruneOldRecords(env) {
+  const listResult = await env.TAROT.list({ limit: 100 });
+  const keys = listResult.keys.map(item => item.name).sort((a, b) => a.localeCompare(b));
+  if (keys.length <= 50) {
+    return;
+  }
+  const toDelete = keys.slice(0, keys.length - 50);
+  await Promise.all(toDelete.map(key => env.TAROT.delete(key)));
+}
+
+=== functions/api/tarot/list.js ===
+export async function onRequest(context) {
+  const { request, env } = context;
+  if (request.method !== 'GET') {
+    return new Response('Method Not Allowed', { status: 405 });
+  }
+
+  try {
+    const listResult = await env.TAROT.list({ limit: 50 });
+    const sortedKeys = listResult.keys
+      .map(item => item.name)
+      .sort((a, b) => b.localeCompare(a))
+      .slice(0, 20);
+
+    const values = await Promise.all(sortedKeys.map(key => env.TAROT.get(key)));
+    const records = values
+      .map((value, index) => {
+        if (!value) return null;
+        try {
+          const data = JSON.parse(value);
+          return {
+            id: sortedKeys[index],
+            question: data.question || '',
+            createdAt: data.createdAt,
+            cards: Array.isArray(data.cards)
+              ? data.cards.map(card => ({
+                  name: card.name,
+                  reversed: card.reversed,
+                  position: card.position
+                }))
+              : []
+          };
+        } catch {
+          return null;
+        }
+      })
+      .filter(Boolean);
+
+    return new Response(JSON.stringify(records), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  } catch (error) {
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+}

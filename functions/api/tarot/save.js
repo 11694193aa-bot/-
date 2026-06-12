@@ -11,7 +11,7 @@ export async function onRequest(context) {
     return new Response('Invalid JSON payload', { status: 400 });
   }
 
-  const { question = '', cards, summary = '', createdAt } = body;
+  const { question = '', cards, summary = '', createdAt, apiKey = '' } = body;
   if (!Array.isArray(cards) || typeof createdAt !== 'number') {
     return new Response('Invalid payload', { status: 400 });
   }
@@ -29,7 +29,7 @@ export async function onRequest(context) {
   };
 
   try {
-    const stored = await augmentAI(record, env);
+    const stored = await augmentAI(record, String(apiKey).trim());
     const key = String(Date.now());
     await env.TAROT.put(key, JSON.stringify(stored));
     await pruneOldRecords(env);
@@ -45,8 +45,7 @@ export async function onRequest(context) {
   }
 }
 
-async function augmentAI(record, env) {
-  const apiKey = env.OPENAI_API_KEY;
+async function augmentAI(record, apiKey) {
   if (!apiKey) {
     record.aiSummary = record.summary;
     return record;
@@ -55,7 +54,7 @@ async function augmentAI(record, env) {
   const prompt = `请基于以下塔罗牌占卜结果，为提问者生成一段简洁且温暖的个性化解读。\n提问：${record.question || '无具体问题'}\n牌阵：${record.cards.map(c => `${c.position} ${c.name}${c.reversed ? '（逆位）' : ''}`).join('，')}\n综合分析：${record.summary}`;
 
   try {
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
