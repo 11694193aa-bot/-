@@ -4,8 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#0d0a1a">
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="星辰塔罗">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="apple-touch-icon" href="/icon-192.png">
   <link rel="manifest" href="/manifest.json">
   <title>星辰塔罗</title>
   <style>
@@ -249,6 +252,20 @@
       apiKeyStatus.textContent = '✦ 已载入保存的 Key，AI 解读已启用';
       apiKeyStatus.style.color = '#7a9f7a';
     }
+
+    window.addEventListener('load', () => {
+      history.replaceState({ page: 'home' }, '', window.location.href);
+      history.pushState({ page: 'home' }, '', window.location.href);
+    });
+
+    window.addEventListener('popstate', () => {
+      if (isDrawn) {
+        reset();
+        history.pushState({ page: 'home' }, '', window.location.href);
+      } else {
+        history.pushState({ page: 'home' }, '', window.location.href);
+      }
+    });
 
     document.getElementById('api-key-save').addEventListener('click', () => {
       const k = apiKeyInput.value.trim();
